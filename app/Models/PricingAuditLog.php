@@ -8,6 +8,7 @@ class PricingAuditLog extends Model
 {
     public $timestamps = false;
 
+    protected $table = 'pricing_audit_log';
     protected $fillable = [
         'pilot_id',
         'pricing_id',

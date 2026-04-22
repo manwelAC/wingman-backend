@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PilotPricing extends Model
 {
+    protected $table = 'pilot_pricing';
     protected $fillable = [
         'pilot_id',
         'game',
