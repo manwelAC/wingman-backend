@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\PricingController;
 use App\Http\Controllers\Api\CalculatorController;
+use App\Http\Controllers\Api\GrindController;
+use App\Http\Controllers\Api\GameRankController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -40,8 +42,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/audit', [PricingController::class, 'audit']);
     });
 
-    //Calculator Controller
+    //Calculator routes
     Route::prefix('calculator')->group(function () {
         Route::post('/rank-boost', [CalculatorController::class, 'rankBoost']);
+    });
+
+    //Grind Routes
+    Route::prefix('grinds')->group(function () {
+        Route::get('/', [GrindController::class, 'index']);
+        Route::post('/', [GrindController::class, 'store']);
+        Route::get('/{id}', [GrindController::class, 'show']);
+        Route::put('/{id}/progress', [GrindController::class, 'updateProgress']);
+        Route::post('/{id}/complete', [GrindController::class, 'complete']);
+        Route::delete('/{id}', [GrindController::class, 'destroy']);
+    });
+
+    //Game Rank routes
+    Route::prefix('games')->group(function () {
+        Route::get('/', [GameRankController::class, 'games']);
+        Route::get('/{game}/ranks', [GameRankController::class, 'index']);
     });
 });
