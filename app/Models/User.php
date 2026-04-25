@@ -11,6 +11,7 @@ class User extends Authenticatable
     use HasFactory, HasApiTokens;
 
     protected $fillable = [
+        'username',
         'user_type',
         'display_name',
         'email',
@@ -21,11 +22,16 @@ class User extends Authenticatable
         'is_verified',
         'verification_date',
         'is_active',
+        'email_verified_at',
+        'verification_code',
+        'verification_code_expires_at',
+        'verification_code_sent_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'verification_code',
     ];
 
     protected $casts = [
@@ -33,6 +39,9 @@ class User extends Authenticatable
         'is_verified'       => 'boolean',
         'is_active'         => 'boolean',
         'verification_date' => 'datetime',
+        'email_verified_at' => 'datetime',
+        'verification_code_expires_at' => 'datetime',
+        'verification_code_sent_at'    => 'datetime',
     ];
 
     public function customers()
@@ -63,5 +72,10 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->user_type === 'admin';
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->email_verified_at !== null;
     }
 }

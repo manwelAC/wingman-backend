@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CustomerController;
@@ -9,8 +12,12 @@ use App\Http\Controllers\Api\CalculatorController;
 use App\Http\Controllers\Api\GrindController;
 use App\Http\Controllers\Api\GameRankController;
 
+
 // Public routes
 Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+    Route::post('/resend-code', [AuthController::class, 'resendCode']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 
