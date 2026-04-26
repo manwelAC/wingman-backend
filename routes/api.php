@@ -19,6 +19,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
     Route::post('/resend-code', [AuthController::class, 'resendCode']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login-fingerprint', [AuthController::class, 'loginWithFingerprint']);
 });
 
 // Protected routes
@@ -26,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/enroll-fingerprint', [AuthController::class, 'enrollFingerprint']);
+        Route::post('/disable-fingerprint', [AuthController::class, 'disableFingerprint']);
     });
 
 

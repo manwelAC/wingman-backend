@@ -26,6 +26,7 @@ class User extends Authenticatable
         'verification_code',
         'verification_code_expires_at',
         'verification_code_sent_at',
+        'fingerprint_enrolled',
     ];
 
     protected $hidden = [

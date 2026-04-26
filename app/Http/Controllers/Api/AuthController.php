@@ -277,6 +277,112 @@ public function login(Request $request)
             'profile_image_url' => $user->profile_image_url,
             'is_active'         => $user->is_active,
             'joined_at'         => $user->created_at,
+            'fingerprint_enrolled' => $user->fingerprint_enrolled,
+        ]);
+    }
+
+    public function enrollFingerprint(Request $request)
+    {
+        $user = $request->user();
+
+        $user->update([
+            'fingerprint_enrolled' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Fingerprint enrolled successfully.',
+            'fingerprint_enrolled' => true,
+        ]);
+    }
+
+    public function loginWithFingerprint(Request $request)
+    {
+        $request->validate([
+            'email_or_username' => 'required|string',
+        ]);
+
+        $key = 'login:' . $request->email_or_username . ':' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json([
+                'message'     => 'Too many login attempts. Please try again later.',
+                'retry_after' => $seconds,
+            ], 429);
+        }
+
+        $user = User::where('email', $request->email_or_username)
+            ->orWhere('username', $request->email_or_username)
+            ->first();
+
+        if (!$user) {
+            RateLimiter::hit($key, 60);
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        if (!$user->fingerprint_enrolled) {
+            return response()->json([
+                'message' => 'Fingerprint not enrolled for this account. To enroll go to your Profile Management',
+            ], 422);
+        }
+
+        if (!$user->is_active) {
+            return response()->json([
+                'message' => 'Account is deactivated.',
+            ], 403);
+        }
+
+        RateLimiter::clear($key);
+
+        // Allow login for unverified users - frontend will redirect to verify-email
+        if (!$user->isEmailVerified()) {
+            return response()->json([
+                'message' => 'Email not verified. Please verify your email.',
+                'email'   => $user->email,
+                'unverified' => true,
+                'user'    => [
+                    'id'                => $user->id,
+                    'username'          => $user->username,
+                    'user_type'         => $user->user_type,
+                    'display_name'      => $user->display_name,
+                    'email'             => $user->email,
+                    'games_expertise'   => $user->games_expertise,
+                    'is_verified'       => $user->is_verified,
+                    'profile_image_url' => $user->profile_image_url,
+                ],
+            ], 200);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => [
+                'id'                => $user->id,
+                'username'          => $user->username,
+                'user_type'         => $user->user_type,
+                'display_name'      => $user->display_name,
+                'email'             => $user->email,
+                'games_expertise'   => $user->games_expertise,
+                'is_verified'       => $user->is_verified,
+                'profile_image_url' => $user->profile_image_url,
+            ],
+        ]);
+    }
+
+    public function disableFingerprint(Request $request)
+    {
+        $user = $request->user();
+
+        $user->update([
+            'fingerprint_enrolled' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Fingerprint disabled.',
+            'fingerprint_enrolled' => false,
         ]);
     }
 }
