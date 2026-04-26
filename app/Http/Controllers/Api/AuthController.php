@@ -25,9 +25,24 @@ public function register(Request $request)
 
     $request->validate([
         'username' => 'required|string|max:255|unique:users,username|alpha_num',
-        'email'    => 'required|email|unique:users,email',
+        'email'    => 'required|email',
         'password' => 'required|string|min:8|confirmed',
     ]);
+
+    // Check if email already exists
+    $existingUser = User::where('email', $request->email)->first();
+    if ($existingUser) {
+        if (!$existingUser->isEmailVerified()) {
+            return response()->json([
+                'message' => 'The email you\'re trying to register is already existing but unverified.',
+                'email'   => $request->email,
+            ], 422);
+        } else {
+            return response()->json([
+                'message' => 'The email address is already in use.',
+            ], 422);
+        }
+    }
 
     RateLimiter::hit($key, 60);
 
@@ -168,11 +183,11 @@ public function resendCode(Request $request)
 public function login(Request $request)
 {
     $request->validate([
-        'email'    => 'required|email',
-        'password' => 'required|string',
+        'email_or_username' => 'required|string',
+        'password'          => 'required|string',
     ]);
 
-    $key = 'login:' . $request->email . ':' . $request->ip();
+    $key = 'login:' . $request->email_or_username . ':' . $request->ip();
 
     if (RateLimiter::tooManyAttempts($key, 5)) {
         $seconds = RateLimiter::availableIn($key);
@@ -182,20 +197,15 @@ public function login(Request $request)
         ], 429);
     }
 
-    $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email_or_username)
+        ->orWhere('username', $request->email_or_username)
+        ->first();
 
     if (!$user || !Hash::check($request->password, $user->password)) {
         RateLimiter::hit($key, 60);
         return response()->json([
             'message' => 'Invalid credentials.',
         ], 401);
-    }
-
-    if (!$user->isEmailVerified()) {
-        return response()->json([
-            'message' => 'Please verify your email before logging in.',
-            'email'   => $user->email,
-        ], 403);
     }
 
     if (!$user->is_active) {
@@ -205,6 +215,25 @@ public function login(Request $request)
     }
 
     RateLimiter::clear($key);
+
+    // Allow login for unverified users - frontend will redirect to verify-email
+    if (!$user->isEmailVerified()) {
+        return response()->json([
+            'message' => 'Email not verified. Please verify your email.',
+            'email'   => $user->email,
+            'unverified' => true,
+            'user'    => [
+                'id'                => $user->id,
+                'username'          => $user->username,
+                'user_type'         => $user->user_type,
+                'display_name'      => $user->display_name,
+                'email'             => $user->email,
+                'games_expertise'   => $user->games_expertise,
+                'is_verified'       => $user->is_verified,
+                'profile_image_url' => $user->profile_image_url,
+            ],
+        ], 200);
+    }
 
     $token = $user->createToken('auth_token')->plainTextToken;
 
