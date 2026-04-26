@@ -12,6 +12,7 @@ class GameRankTier extends Model
         'tier_order',
         'rank_group',
         'tier_number',
+        'stars_per_tier',
         'is_active',
     ];
 

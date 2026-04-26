@@ -29,7 +29,7 @@ class PricingController extends Controller
             'range_name'              => 'required|string|max:100',
             'tier_start_id'           => 'required|exists:game_rank_tiers,id',
             'tier_end_id'             => 'required|exists:game_rank_tiers,id',
-            'price_per_tier'          => 'required|numeric|min:0',
+            'price_per_star'          => 'required|numeric|min:0',
             'major_rank_crossing_fee' => 'nullable|numeric|min:0',
             'display_order'           => 'nullable|integer',
             'reason'                  => 'nullable|string',
@@ -57,7 +57,7 @@ class PricingController extends Controller
             'range_name'              => $request->range_name,
             'tier_start_id'           => $request->tier_start_id,
             'tier_end_id'             => $request->tier_end_id,
-            'price_per_tier'          => $request->price_per_tier,
+            'price_per_star'          => $request->price_per_star,
             'major_rank_crossing_fee' => $request->major_rank_crossing_fee ?? 0,
             'display_order'           => $request->display_order ?? 0,
             'is_active'               => true,
@@ -68,8 +68,8 @@ class PricingController extends Controller
             'pilot_id'          => $request->user()->id,
             'pricing_id'        => $pricing->id,
             'action'            => 'created',
-            'old_price_per_tier'=> null,
-            'new_price_per_tier'=> $pricing->price_per_tier,
+            'old_price_per_star'=> null,
+            'new_price_per_star'=> $pricing->price_per_star,
             'old_crossing_fee'  => null,
             'new_crossing_fee'  => $pricing->major_rank_crossing_fee,
             'reason'            => $request->reason,
@@ -88,19 +88,19 @@ class PricingController extends Controller
 
         $request->validate([
             'range_name'              => 'sometimes|string|max:100',
-            'price_per_tier'          => 'sometimes|numeric|min:0',
+            'price_per_star'          => 'sometimes|numeric|min:0',
             'major_rank_crossing_fee' => 'nullable|numeric|min:0',
             'display_order'           => 'nullable|integer',
             'reason'                  => 'nullable|string',
         ]);
 
         // Snapshot old values for audit
-        $oldPrice       = $pricing->price_per_tier;
+        $oldPrice       = $pricing->price_per_star;
         $oldCrossingFee = $pricing->major_rank_crossing_fee;
 
         $pricing->update($request->only([
             'range_name',
-            'price_per_tier',
+            'price_per_star',
             'major_rank_crossing_fee',
             'display_order',
         ]));
@@ -110,8 +110,8 @@ class PricingController extends Controller
             'pilot_id'           => $request->user()->id,
             'pricing_id'         => $pricing->id,
             'action'             => 'updated',
-            'old_price_per_tier' => $oldPrice,
-            'new_price_per_tier' => $pricing->price_per_tier,
+            'old_price_per_star' => $oldPrice,
+            'new_price_per_star' => $pricing->price_per_star,
             'old_crossing_fee'   => $oldCrossingFee,
             'new_crossing_fee'   => $pricing->major_rank_crossing_fee,
             'reason'             => $request->reason,
@@ -133,8 +133,8 @@ class PricingController extends Controller
             'pilot_id'           => $request->user()->id,
             'pricing_id'         => $pricing->id,
             'action'             => 'deactivated',
-            'old_price_per_tier' => $pricing->price_per_tier,
-            'new_price_per_tier' => null,
+            'old_price_per_star' => $pricing->price_per_star,
+            'new_price_per_star' => null,
             'old_crossing_fee'   => $pricing->major_rank_crossing_fee,
             'new_crossing_fee'   => null,
             'reason'             => $request->reason,

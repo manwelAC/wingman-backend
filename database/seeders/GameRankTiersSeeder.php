@@ -24,27 +24,29 @@ class GameRankTiersSeeder extends Seeder
         foreach ($codmRanks as $group => $numbers) {
             foreach ($numbers as $number) {
                 $tiers[] = [
-                    'game'        => 'CODM',
-                    'tier_name'   => "$group $number",
-                    'tier_order'  => $order++,
-                    'rank_group'  => $group,
-                    'tier_number' => $number,
-                    'is_active'   => true,
-                    'created_at'  => now(),
-                    'updated_at'  => now(),
+                    'game'           => 'CODM',
+                    'tier_name'      => "$group $number",
+                    'tier_order'     => $order++,
+                    'rank_group'     => $group,
+                    'tier_number'    => $number,
+                    'stars_per_tier' => 1,
+                    'is_active'      => true,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ];
             }
         }
         // CODM peak
         $tiers[] = [
-            'game'        => 'CODM',
-            'tier_name'   => 'Legendary',
-            'tier_order'  => $order++,
-            'rank_group'  => 'Legendary',
-            'tier_number' => null,
-            'is_active'   => true,
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'game'           => 'CODM',
+            'tier_name'      => 'Legendary',
+            'tier_order'     => $order++,
+            'rank_group'     => 'Legendary',
+            'tier_number'    => null,
+            'stars_per_tier' => 1,
+            'is_active'      => true,
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ];
 
         // Valorant
@@ -63,27 +65,29 @@ class GameRankTiersSeeder extends Seeder
         foreach ($valorantRanks as $group => $numbers) {
             foreach ($numbers as $number) {
                 $tiers[] = [
-                    'game'        => 'Valorant',
-                    'tier_name'   => "$group $number",
-                    'tier_order'  => $order++,
-                    'rank_group'  => $group,
-                    'tier_number' => $number,
-                    'is_active'   => true,
-                    'created_at'  => now(),
-                    'updated_at'  => now(),
+                    'game'           => 'Valorant',
+                    'tier_name'      => "$group $number",
+                    'tier_order'     => $order++,
+                    'rank_group'     => $group,
+                    'tier_number'    => $number,
+                    'stars_per_tier' => 1,
+                    'is_active'      => true,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ];
             }
         }
         // Valorant peak
         $tiers[] = [
-            'game'        => 'Valorant',
-            'tier_name'   => 'Radiant',
-            'tier_order'  => $order++,
-            'rank_group'  => 'Radiant',
-            'tier_number' => null,
-            'is_active'   => true,
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'game'           => 'Valorant',
+            'tier_name'      => 'Radiant',
+            'tier_order'     => $order++,
+            'rank_group'     => 'Radiant',
+            'tier_number'    => null,
+            'stars_per_tier' => 1,
+            'is_active'      => true,
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ];
 
         // MLBB
@@ -100,29 +104,42 @@ class GameRankTiersSeeder extends Seeder
 
         $order = 1;
         foreach ($mlbbRanks as $group => $numbers) {
+            // Determine stars per tier based on rank group
+            $starsPerTier = match($group) {
+                'Warrior'     => 3,
+                'Elite'       => 4,
+                'Master'      => 4,
+                'Grandmaster' => 5,
+                'Epic'        => 5,
+                'Legend'      => 5,
+                default       => 1,
+            };
+
             foreach ($numbers as $number) {
                 $tiers[] = [
-                    'game'        => 'MLBB',
-                    'tier_name'   => "$group $number",
-                    'tier_order'  => $order++,
-                    'rank_group'  => $group,
-                    'tier_number' => $number,
-                    'is_active'   => true,
-                    'created_at'  => now(),
-                    'updated_at'  => now(),
+                    'game'           => 'MLBB',
+                    'tier_name'      => "$group $number",
+                    'tier_order'     => $order++,
+                    'rank_group'     => $group,
+                    'tier_number'    => $number,
+                    'stars_per_tier' => $starsPerTier,
+                    'is_active'      => true,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ];
             }
         }
         // MLBB peak
         $tiers[] = [
-            'game'        => 'MLBB',
-            'tier_name'   => 'Mythic',
-            'tier_order'  => $order++,
-            'rank_group'  => 'Mythic',
-            'tier_number' => null,
-            'is_active'   => true,
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'game'           => 'MLBB',
+            'tier_name'      => 'Mythic',
+            'tier_order'     => $order++,
+            'rank_group'     => 'Mythic',
+            'tier_number'    => null,
+            'stars_per_tier' => 1,
+            'is_active'      => true,
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ];
 
         DB::table('game_rank_tiers')->insert($tiers);

@@ -58,8 +58,19 @@ class PriceCalculatorService
             $rangeEndOrder  = min($range->tierEnd->tier_order, $targetOrder);
             $tiersInRange   = $rangeEndOrder - $currentOrder;
 
-            // Base cost for this range segment
-            $segmentPrice   = $tiersInRange * $range->price_per_tier;
+            // Calculate total stars in this range
+            $totalStarsInRange = 0;
+            for ($order = $currentOrder; $order < $rangeEndOrder; $order++) {
+                $tier = GameRankTier::where('tier_order', $order)
+                    ->where('game', $game)
+                    ->first();
+                if ($tier) {
+                    $totalStarsInRange += $tier->stars_per_tier;
+                }
+            }
+
+            // Base cost for this range segment (stars × price_per_star)
+            $segmentPrice   = $totalStarsInRange * $range->price_per_star;
 
             // Check for major rank group crossings within this segment
             $crossingFee    = 0;
@@ -78,7 +89,8 @@ class PriceCalculatorService
             $breakdown[] = [
                 'range_name'              => $range->range_name,
                 'tiers'                   => $tiersInRange,
-                'price_per_tier'          => (float) $range->price_per_tier,
+                'total_stars'             => $totalStarsInRange,
+                'price_per_star'          => (float) $range->price_per_star,
                 'subtotal'                => (float) $segmentPrice,
                 'crossings'               => $crossings,
                 'major_rank_crossing_fee' => (float) $crossingFee,
@@ -89,11 +101,23 @@ class PriceCalculatorService
             $currentOrder  = $rangeEndOrder;
         }
 
+        // Calculate total stars from start to target
+        $totalStars = 0;
+        for ($order = $startTier->tier_order; $order < $targetTier->tier_order; $order++) {
+            $tier = GameRankTier::where('tier_order', $order)
+                ->where('game', $game)
+                ->first();
+            if ($tier) {
+                $totalStars += $tier->stars_per_tier;
+            }
+        }
+
         return [
             'game'         => $game,
             'start_tier'   => $startTier->tier_name,
             'target_tier'  => $targetTier->tier_name,
             'total_tiers'  => $targetTier->tier_order - $startTier->tier_order,
+            'total_stars'  => $totalStars,
             'base_price'   => (float) $totalPrice,
             'breakdown'    => $breakdown,
         ];

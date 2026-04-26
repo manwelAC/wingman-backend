@@ -13,14 +13,14 @@ class PilotPricing extends Model
         'range_name',
         'tier_start_id',
         'tier_end_id',
-        'price_per_tier',
+        'price_per_star',
         'major_rank_crossing_fee',
         'is_active',
         'display_order',
     ];
 
     protected $casts = [
-        'price_per_tier'          => 'decimal:2',
+        'price_per_star'          => 'decimal:2',
         'major_rank_crossing_fee' => 'decimal:2',
         'is_active'               => 'boolean',
     ];

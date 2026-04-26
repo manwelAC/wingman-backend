@@ -13,8 +13,8 @@ class PricingAuditLog extends Model
         'pilot_id',
         'pricing_id',
         'action',
-        'old_price_per_tier',
-        'new_price_per_tier',
+        'old_price_per_star',
+        'new_price_per_star',
         'old_crossing_fee',
         'new_crossing_fee',
         'reason',
@@ -23,8 +23,8 @@ class PricingAuditLog extends Model
     ];
 
     protected $casts = [
-        'old_price_per_tier' => 'decimal:2',
-        'new_price_per_tier' => 'decimal:2',
+        'old_price_per_star' => 'decimal:2',
+        'new_price_per_star' => 'decimal:2',
         'old_crossing_fee'   => 'decimal:2',
         'new_crossing_fee'   => 'decimal:2',
         'created_at'         => 'datetime',
