@@ -91,6 +91,7 @@ class PricingController extends Controller
             'price_per_star'          => 'sometimes|numeric|min:0',
             'major_rank_crossing_fee' => 'nullable|numeric|min:0',
             'display_order'           => 'nullable|integer',
+            'is_active'               => 'sometimes|boolean',
             'reason'                  => 'nullable|string',
         ]);
 
@@ -103,6 +104,7 @@ class PricingController extends Controller
             'price_per_star',
             'major_rank_crossing_fee',
             'display_order',
+            'is_active',
         ]));
 
         // Auto-write audit log
@@ -123,30 +125,30 @@ class PricingController extends Controller
         return response()->json($pricing);
     }
 
-    public function destroy(Request $request, $id)
-    {
-        $pricing = PilotPricing::where('pilot_id', $request->user()->id)
-            ->findOrFail($id);
+public function destroy(Request $request, $id)
+{
+    $pricing = PilotPricing::where('pilot_id', $request->user()->id)
+        ->findOrFail($id);
 
-        // Auto-write audit log before deactivating
-        PricingAuditLog::create([
-            'pilot_id'           => $request->user()->id,
-            'pricing_id'         => $pricing->id,
-            'action'             => 'deactivated',
-            'old_price_per_star' => $pricing->price_per_star,
-            'new_price_per_star' => null,
-            'old_crossing_fee'   => $pricing->major_rank_crossing_fee,
-            'new_crossing_fee'   => null,
-            'reason'             => $request->reason,
-            'created_at'         => now(),
-        ]);
+    // Log the deletion
+    PricingAuditLog::create([
+        'pilot_id'           => $request->user()->id,
+        'pricing_id'         => $pricing->id,
+        'action'             => 'deleted',
+        'old_price_per_star' => $pricing->price_per_star,
+        'new_price_per_star' => null,
+        'old_crossing_fee'   => $pricing->major_rank_crossing_fee,
+        'new_crossing_fee'   => null,
+        'reason'             => $request->input('reason', null),
+        'created_at'         => now(),
+    ]);
 
-        $pricing->update(['is_active' => false]);
+    $pricing->forceDelete();  // Hard delete, bypasses soft deletes
 
-        return response()->json([
-            'message' => 'Pricing tier deactivated.',
-        ]);
-    }
+    return response()->json([
+        'message' => 'Pricing tier deleted.',
+    ]);
+}
 
     public function audit(Request $request)
     {

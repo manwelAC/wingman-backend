@@ -26,6 +26,7 @@ class Grind extends Model
         'special_instructions',
         'started_at',
         'completed_at',
+        'cancelled_at',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class Grind extends Model
         'price_per_win'       => 'decimal:2',
         'started_at'          => 'datetime',
         'completed_at'        => 'datetime',
+        'cancelled_at'        => 'datetime',
     ];
 
     public function pilot()

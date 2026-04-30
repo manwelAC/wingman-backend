@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // Modify the enum to include 'deleted'
+        DB::statement("ALTER TABLE pricing_audit_log MODIFY action ENUM('created', 'updated', 'deactivated', 'reactivated', 'deleted')");
+    }
+
+    public function down(): void
+    {
+        // Revert to original enum
+        DB::statement("ALTER TABLE pricing_audit_log MODIFY action ENUM('created', 'updated', 'deactivated', 'reactivated')");
+    }
+};

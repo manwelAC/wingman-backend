@@ -134,16 +134,33 @@ class GrindController extends Controller
             'current_tier'        => 'sometimes|nullable|string',
         ]);
 
-        // Handle status transitions
-        if ($request->status === 'in_progress' && $grind->status === 'not_started') {
-            $grind->started_at = now();
-        }
+        $oldStatus = $grind->status;
+        $newStatus = $request->status ?? $grind->status;
 
-        $grind->update($request->only([
+        // Handle status transitions with timestamps
+        $updateData = $request->only([
             'status',
             'progress_percentage',
             'current_tier',
-        ]));
+        ]);
+
+        // Transition: not_started -> in_progress
+        if ($oldStatus === 'not_started' && $newStatus === 'in_progress') {
+            $updateData['started_at'] = now();
+        }
+
+        // Transition: in_progress -> completed
+        if ($oldStatus === 'in_progress' && $newStatus === 'completed') {
+            $updateData['completed_at'] = now();
+            $updateData['progress_percentage'] = 100;
+        }
+
+        // Transition: any -> cancelled
+        if ($newStatus === 'cancelled') {
+            $updateData['cancelled_at'] = now();
+        }
+
+        $grind->update($updateData);
 
         return response()->json($grind);
     }
