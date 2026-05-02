@@ -27,6 +27,11 @@ class User extends Authenticatable
         'verification_code_expires_at',
         'verification_code_sent_at',
         'fingerprint_enrolled',
+        'last_login_ip',
+        'last_login_city',
+        'last_login_country',
+        'last_login_at',
+        'trusted_locations',
     ];
 
     protected $hidden = [
@@ -43,6 +48,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'verification_code_expires_at' => 'datetime',
         'verification_code_sent_at'    => 'datetime',
+        'last_login_at'     => 'datetime',
+        'trusted_locations' => 'array',
     ];
 
     public function customers()

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeMail;
 use App\Models\User;
+use App\Services\LocationSecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -214,6 +215,40 @@ public function login(Request $request)
         ], 403);
     }
 
+    // Check for VPN usage
+    $locationService = new LocationSecurityService();
+    $clientIp = $request->ip();
+    
+    if ($locationService->detectVpn($clientIp)) {
+        return response()->json([
+            'message' => 'VPN usage detected. Please disable VPN to login.',
+            'vpn_detected' => true,
+        ], 403);
+    }
+
+    // Get geolocation and check for anomalies
+    $geolocation = $locationService->getGeolocation($clientIp);
+    
+    if ($locationService->isAnomalousLocation($user, $geolocation)) {
+        // Mark as anomalous but allow with email verification requirement
+        return response()->json([
+            'message' => 'Unusual login location detected. Please verify your email to continue.',
+            'email' => $user->email,
+            'unverified' => true,
+            'require_location_verification' => true,
+            'user' => [
+                'id'                => $user->id,
+                'username'          => $user->username,
+                'user_type'         => $user->user_type,
+                'display_name'      => $user->display_name,
+                'email'             => $user->email,
+                'games_expertise'   => $user->games_expertise,
+                'is_verified'       => $user->is_verified,
+                'profile_image_url' => $user->profile_image_url,
+            ],
+        ], 200);
+    }
+
     RateLimiter::clear($key);
 
     // Allow login for unverified users - frontend will redirect to verify-email
@@ -234,6 +269,9 @@ public function login(Request $request)
             ],
         ], 200);
     }
+
+    // Record successful login
+    $locationService->recordLogin($user, $clientIp, $geolocation);
 
     $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -334,6 +372,40 @@ public function login(Request $request)
             ], 403);
         }
 
+        // Check for VPN usage
+        $locationService = new LocationSecurityService();
+        $clientIp = $request->ip();
+        
+        if ($locationService->detectVpn($clientIp)) {
+            return response()->json([
+                'message' => 'VPN usage detected. Please disable VPN to login.',
+                'vpn_detected' => true,
+            ], 403);
+        }
+
+        // Get geolocation and check for anomalies
+        $geolocation = $locationService->getGeolocation($clientIp);
+        
+        if ($locationService->isAnomalousLocation($user, $geolocation)) {
+            // Mark as anomalous but allow with email verification requirement
+            return response()->json([
+                'message' => 'Unusual login location detected. Please verify your email to continue.',
+                'email' => $user->email,
+                'unverified' => true,
+                'require_location_verification' => true,
+                'user' => [
+                    'id'                => $user->id,
+                    'username'          => $user->username,
+                    'user_type'         => $user->user_type,
+                    'display_name'      => $user->display_name,
+                    'email'             => $user->email,
+                    'games_expertise'   => $user->games_expertise,
+                    'is_verified'       => $user->is_verified,
+                    'profile_image_url' => $user->profile_image_url,
+                ],
+            ], 200);
+        }
+
         RateLimiter::clear($key);
 
         // Allow login for unverified users - frontend will redirect to verify-email
@@ -354,6 +426,9 @@ public function login(Request $request)
                 ],
             ], 200);
         }
+
+        // Record successful login
+        $locationService->recordLogin($user, $clientIp, $geolocation);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -383,6 +458,34 @@ public function login(Request $request)
         return response()->json([
             'message' => 'Fingerprint disabled.',
             'fingerprint_enrolled' => false,
+        ]);
+    }
+
+    public function trustLocation(Request $request)
+    {
+        $request->validate([
+            'city'    => 'required|string',
+            'country' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $locationService = new LocationSecurityService();
+        $locationService->trustLocation($user, $request->city, $request->country);
+
+        return response()->json([
+            'message' => 'Location trusted successfully.',
+            'trusted_locations' => $user->trusted_locations,
+        ]);
+    }
+
+    public function getLocation(Request $request)
+    {
+        $locationService = new LocationSecurityService();
+        $geolocation = $locationService->getGeolocation($request->ip());
+
+        return response()->json([
+            'city' => $geolocation['city'] ?? 'Unknown',
+            'country' => $geolocation['country'] ?? 'Unknown',
         ]);
     }
 }

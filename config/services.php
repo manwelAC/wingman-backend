@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'ipqualityscore' => [
+        'key' => env('IPQUALITYSCORE_API_KEY'),
+    ],
+
 ];
