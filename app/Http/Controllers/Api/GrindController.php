@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Grind;
 use App\Models\GrindPaymentMethod;
 use App\Services\PriceCalculatorService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 
 class GrindController extends Controller
 {
     protected PriceCalculatorService $calculator;
+    protected WalletService $walletService;
 
-    public function __construct(PriceCalculatorService $calculator)
+    public function __construct(PriceCalculatorService $calculator, WalletService $walletService)
     {
         $this->calculator = $calculator;
+        $this->walletService = $walletService;
     }
 
     public function index(Request $request)
@@ -176,6 +179,7 @@ class GrindController extends Controller
     public function complete(Request $request, $id)
     {
         $grind = Grind::where('pilot_id', $request->user()->id)
+            ->with('paymentMethod')
             ->findOrFail($id);
 
         if ($grind->status === 'completed') {
@@ -195,6 +199,14 @@ class GrindController extends Controller
             'progress_percentage' => 100,
             'completed_at'        => now(),
         ]);
+
+        // Record earning in wallet
+        if ($grind->paymentMethod) {
+            $this->walletService->recordGrindEarning(
+                $grind,
+                $grind->paymentMethod->payment_method_type_id
+            );
+        }
 
         return response()->json([
             'message'      => 'Grind completed successfully.',

@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->hasOne(UserPaymentMethod::class)->where('is_preferred', true)->active();
     }
 
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
     public function isPilot(): bool
     {
         return $this->user_type === 'pilot';

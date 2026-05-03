@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CalculatorController;
 use App\Http\Controllers\Api\GrindController;
 use App\Http\Controllers\Api\GameRankController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Api\WalletController;
 
 
 // Public routes
@@ -83,4 +84,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/payment-methods/{id}/toggle', [PaymentMethodController::class, 'toggle']);
     Route::patch('/payment-methods/{id}/set-preferred', [PaymentMethodController::class, 'setPreferred']);
     Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy']);
+
+    //Wallet routes
+    Route::prefix('wallet')->group(function () {
+        Route::get('/', [WalletController::class, 'show']);
+        Route::get('/transactions', [WalletController::class, 'transactions']);
+        Route::get('/earnings-by-payment-method', [WalletController::class, 'earningsByPaymentMethod']);
+        Route::get('/earnings-by-payment-method/{payment_method_type_id}', [WalletController::class, 'earningsTimeline']);
+        Route::post('/sync', [WalletController::class, 'sync']);
+    });
 });
