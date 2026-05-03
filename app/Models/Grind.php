@@ -57,4 +57,9 @@ class Grind extends Model
     {
         return $this->belongsTo(GameRankTier::class, 'target_tier_id');
     }
+
+    public function paymentMethod()
+    {
+        return $this->hasOne(GrindPaymentMethod::class);
+    }
 }

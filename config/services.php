@@ -39,4 +39,8 @@ return [
         'key' => env('IPQUALITYSCORE_API_KEY'),
     ],
 
+    'proxycheck' => [
+        'key' => env('PROXYCHECK_API_KEY'),
+    ],
+
 ];

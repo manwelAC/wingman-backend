@@ -4,38 +4,44 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LocationSecurityService
 {
     /**
-     * Detect VPN/Proxy usage via IP Quality Score API
-     * Free tier available: https://ipqualityscore.com/
+     * Detect VPN/Proxy usage via ProxyCheck.io API
+     * Free tier available: https://proxycheck.io/
      */
     public function detectVpn(string $ipAddress): bool
     {
         try {
-            $apiKey = config('services.ipqualityscore.key');
+            $apiKey = config('services.proxycheck.key');
             if (!$apiKey) {
                 // If API key not configured, skip VPN detection (not ideal but graceful)
                 return false;
             }
 
             $response = Http::timeout(5)
-                ->get("https://ipqualityscore.com/api/json/ip/{$ipAddress}", [
+                ->get('https://proxycheck.abuseipdb.com/v2/', [
+                    'ip' => $ipAddress,
                     'key' => $apiKey,
-                    'strictness' => 1, // 0 = lenient, 1 = standard, 2 = strict
+                    'vpn' => 1,
+                    'format' => 'json',
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                // Check if it's a VPN, proxy, or datacenter IP
-                return $data['is_vpn'] === true 
-                    || $data['is_proxy'] === true 
-                    || $data['is_crawler'] === true;
+                
+                // ProxyCheck returns 'yes'/'no' strings for is_proxy and is_vpn
+                // Check if IP is flagged as proxy or VPN
+                if (isset($data['status']) && $data['status'] === 'ok') {
+                    return ($data['is_proxy'] ?? 'no') === 'yes' 
+                        || ($data['is_vpn'] ?? 'no') === 'yes';
+                }
             }
         } catch (\Exception $e) {
             // Log error but don't block on service failure
-            \Log::warning("VPN detection failed for IP {$ipAddress}: " . $e->getMessage());
+            Log::warning("VPN detection failed for IP {$ipAddress}: " . $e->getMessage());
         }
 
         return false;
@@ -68,7 +74,7 @@ class LocationSecurityService
                 ];
             }
         } catch (\Exception $e) {
-            \Log::warning("Geolocation lookup failed for IP {$ipAddress}: " . $e->getMessage());
+            Log::warning("Geolocation lookup failed for IP {$ipAddress}: " . $e->getMessage());
         }
 
         return null;

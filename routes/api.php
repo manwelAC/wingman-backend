@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\PricingController;
 use App\Http\Controllers\Api\CalculatorController;
 use App\Http\Controllers\Api\GrindController;
 use App\Http\Controllers\Api\GameRankController;
+use App\Http\Controllers\PaymentMethodController;
 
 
 // Public routes
@@ -72,4 +73,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [GameRankController::class, 'games']);
         Route::get('/{game}/ranks', [GameRankController::class, 'index']);
     });
+
+    //Payment Methods routes
+    Route::get('/payment-methods/available', [PaymentMethodController::class, 'getAvailableMethods']);
+    Route::get('/payment-methods/for-grind', [PaymentMethodController::class, 'getForGrindLogging']);
+    Route::get('/payment-methods', [PaymentMethodController::class, 'getUserMethods']);
+    Route::post('/payment-methods', [PaymentMethodController::class, 'store']);
+    Route::patch('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
+    Route::patch('/payment-methods/{id}/toggle', [PaymentMethodController::class, 'toggle']);
+    Route::patch('/payment-methods/{id}/set-preferred', [PaymentMethodController::class, 'setPreferred']);
+    Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy']);
 });

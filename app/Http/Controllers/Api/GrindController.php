@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Grind;
+use App\Models\GrindPaymentMethod;
 use App\Services\PriceCalculatorService;
 use Illuminate\Http\Request;
 
@@ -19,7 +20,7 @@ class GrindController extends Controller
     public function index(Request $request)
     {
         $query = Grind::where('pilot_id', $request->user()->id)
-            ->with(['customer', 'startingTier', 'targetTier']);
+            ->with(['customer', 'startingTier', 'targetTier', 'paymentMethod.paymentMethodType']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -46,6 +47,7 @@ class GrindController extends Controller
             'price_per_win'        => 'required_if:service_type,win_count|numeric|min:0',
             'account_username'     => 'nullable|string|max:255',
             'special_instructions' => 'nullable|string',
+            'payment_method_type_id' => 'required|exists:payment_method_types,id',
         ]);
 
         $pilotId = $request->user()->id;
@@ -100,7 +102,13 @@ class GrindController extends Controller
             'special_instructions' => $request->special_instructions,
         ]);
 
-        $grind->load(['customer', 'startingTier', 'targetTier']);
+        // Create GrindPaymentMethod record
+        GrindPaymentMethod::create([
+            'grind_id' => $grind->id,
+            'payment_method_type_id' => $request->payment_method_type_id,
+        ]);
+
+        $grind->load(['customer', 'startingTier', 'targetTier', 'paymentMethod.paymentMethodType']);
 
         return response()->json([
             'grind'     => $grind,
@@ -111,7 +119,7 @@ class GrindController extends Controller
     public function show(Request $request, $id)
     {
         $grind = Grind::where('pilot_id', $request->user()->id)
-            ->with(['customer', 'startingTier', 'targetTier'])
+            ->with(['customer', 'startingTier', 'targetTier', 'paymentMethod.paymentMethodType'])
             ->findOrFail($id);
 
         return response()->json($grind);

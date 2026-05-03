@@ -72,6 +72,21 @@ class User extends Authenticatable
         return $this->hasMany(PricingAuditLog::class, 'pilot_id');
     }
 
+    public function paymentMethods()
+    {
+        return $this->hasMany(UserPaymentMethod::class);
+    }
+
+    public function activePaymentMethods()
+    {
+        return $this->paymentMethods()->active();
+    }
+
+    public function preferredPaymentMethod()
+    {
+        return $this->hasOne(UserPaymentMethod::class)->where('is_preferred', true)->active();
+    }
+
     public function isPilot(): bool
     {
         return $this->user_type === 'pilot';
