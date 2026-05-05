@@ -21,6 +21,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'GCash',
                 'category' => 'e_wallet',
                 'icon_name' => 'wallet-outline',
+                'logo_path' => 'payment-logo/GCASH.png',
                 'description' => 'GCash mobile wallet',
                 'is_active' => true,
             ],
@@ -29,6 +30,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'Maya',
                 'category' => 'e_wallet',
                 'icon_name' => 'wallet-outline',
+                'logo_path' => 'payment-logo/MAYA.png',
                 'description' => 'Maya mobile wallet',
                 'is_active' => true,
             ],
@@ -37,6 +39,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'PayPal',
                 'category' => 'e_wallet',
                 'icon_name' => 'logo-paypal',
+                'logo_path' => 'payment-logo/PayPal.png',
                 'description' => 'PayPal account transfer',
                 'is_active' => true,
             ],
@@ -45,6 +48,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'Mari Bank',
                 'category' => 'e_wallet',
                 'icon_name' => 'wallet-outline',
+                'logo_path' => 'payment-logo/maribank.png',
                 'description' => 'Mari Bank app',
                 'is_active' => true,
             ],
@@ -55,6 +59,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'BDO',
                 'category' => 'bank_transfer',
                 'icon_name' => 'business-outline',
+                'logo_path' => 'payment-logo/BDO.png',
                 'description' => 'BDO Bank Transfer',
                 'is_active' => true,
             ],
@@ -63,6 +68,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'BPI',
                 'category' => 'bank_transfer',
                 'icon_name' => 'business-outline',
+                'logo_path' => 'payment-logo/BPI.png',
                 'description' => 'BPI Bank Transfer',
                 'is_active' => true,
             ],
@@ -71,6 +77,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'Union Bank',
                 'category' => 'bank_transfer',
                 'icon_name' => 'business-outline',
+                'logo_path' => 'payment-logo/UnionBank.png',
                 'description' => 'Union Bank Transfer',
                 'is_active' => true,
             ],
@@ -79,6 +86,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'PNB',
                 'category' => 'bank_transfer',
                 'icon_name' => 'business-outline',
+                'logo_path' => 'payment-logo/PNB.png',
                 'description' => 'PNB Bank Transfer',
                 'is_active' => true,
             ],
@@ -87,6 +95,7 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'East West Bank',
                 'category' => 'bank_transfer',
                 'icon_name' => 'business-outline',
+                'logo_path' => 'payment-logo/Eastwest.png',
                 'description' => 'East West Bank Transfer',
                 'is_active' => true,
             ],
@@ -97,13 +106,14 @@ class PaymentMethodTypeSeeder extends Seeder
                 'name' => 'Credit Card',
                 'category' => 'credit_card',
                 'icon_name' => 'card-outline',
+                'logo_path' => 'payment-logo/CreditCard.png',
                 'description' => 'Credit Card Payment',
                 'is_active' => true,
             ],
         ];
 
         foreach ($paymentMethods as $method) {
-            PaymentMethodType::firstOrCreate(
+            PaymentMethodType::updateOrCreate(
                 ['code' => $method['code']],
                 $method
             );

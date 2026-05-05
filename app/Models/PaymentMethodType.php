@@ -14,6 +14,7 @@ class PaymentMethodType extends Model
         'name',
         'category',
         'icon_name',
+        'logo_path',
         'description',
         'is_active',
     ];

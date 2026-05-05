@@ -127,6 +127,7 @@ class WalletService
                 'code' => $methodType->code,
                 'name' => $methodType->name,
                 'icon' => $methodType->icon_name,
+                'logo_path' => $methodType->logo_path,
                 'category' => $methodType->category,
                 'total_earned' => $earnings ? (float) $earnings->total_earned : 0,
                 'grind_count' => $earnings ? (int) $earnings->grind_count : 0,
