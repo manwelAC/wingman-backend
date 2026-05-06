@@ -170,7 +170,7 @@ class WalletService
         $timeline = WalletTransaction::where('wallet_id', $wallet->id)
             ->where('type', 'earning')
             ->where('payment_method_type_id', $paymentMethodTypeId)
-            ->with('grind')
+            ->with('grind.startingTier', 'grind.targetTier')
             ->orderByDesc('created_at')
             ->paginate($limit, ['*'], 'page', $page);
 
@@ -333,8 +333,8 @@ class WalletService
                 'grind_number' => $grind->grind_number,
                 'game' => $grind->game,
                 'service_type' => $grind->service_type,
-                'starting_tier' => $grind->starting_tier,
-                'target_tier' => $grind->target_tier,
+                'starting_tier' => $grind->startingTier?->tier_name,
+                'target_tier' => $grind->targetTier?->tier_name,
                 'target_stars' => $grind->target_stars,
                 'final_price' => (float) $grind->final_price,
                 'completed_at' => $grind->completed_at?->toIso8601String(),
