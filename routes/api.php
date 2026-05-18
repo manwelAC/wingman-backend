@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [GrindController::class, 'index']);
         Route::post('/', [GrindController::class, 'store']);
         Route::get('/{id}', [GrindController::class, 'show']);
+        Route::put('/{id}', [GrindController::class, 'update']);
         Route::put('/{id}/progress', [GrindController::class, 'updateProgress']);
         Route::post('/{id}/complete', [GrindController::class, 'complete']);
         Route::delete('/{id}', [GrindController::class, 'destroy']);

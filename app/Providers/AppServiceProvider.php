@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Grind;
+use App\Observers\GrindObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -16,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Register model observers
+        Grind::observe(GrindObserver::class);
+
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(6)->by($request->ip());
         });

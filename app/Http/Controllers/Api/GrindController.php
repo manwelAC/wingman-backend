@@ -51,6 +51,7 @@ class GrindController extends Controller
             'account_username'     => 'nullable|string|max:255',
             'special_instructions' => 'nullable|string',
             'payment_method_type_id' => 'required|exists:payment_method_types,id',
+            'due_date'             => 'nullable|date|after:now',
         ]);
 
         $pilotId = $request->user()->id;
@@ -103,6 +104,7 @@ class GrindController extends Controller
             'progress_percentage'  => 0,
             'account_username'     => $request->account_username,
             'special_instructions' => $request->special_instructions,
+            'due_date'             => $request->due_date,
         ]);
 
         // Create GrindPaymentMethod record
@@ -124,6 +126,31 @@ class GrindController extends Controller
         $grind = Grind::where('pilot_id', $request->user()->id)
             ->with(['customer', 'startingTier', 'targetTier', 'paymentMethod.paymentMethodType'])
             ->findOrFail($id);
+
+        return response()->json($grind);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $grind = Grind::where('pilot_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $request->validate([
+            'customer_id'          => 'sometimes|nullable|exists:customers,id',
+            'account_username'     => 'sometimes|nullable|string|max:255',
+            'special_instructions' => 'sometimes|nullable|string',
+            'due_date'             => 'sometimes|nullable|date|after:now',
+        ]);
+
+        $updateData = $request->only([
+            'customer_id',
+            'account_username',
+            'special_instructions',
+            'due_date',
+        ]);
+
+        $grind->update($updateData);
+        $grind->load(['customer', 'startingTier', 'targetTier', 'paymentMethod.paymentMethodType']);
 
         return response()->json($grind);
     }
