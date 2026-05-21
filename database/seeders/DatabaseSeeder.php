@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             GameRankTiersSeeder::class,
             PilotSeeder::class,
+            PaymentMethodTypeSeeder::class,
         ]);
     }
 }
