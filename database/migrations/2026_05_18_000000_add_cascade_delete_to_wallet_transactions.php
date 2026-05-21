@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('wallet_transactions') || !Schema::hasColumn('wallet_transactions', 'grind_id')) {
+            return;
+        }
+
         Schema::table('wallet_transactions', function (Blueprint $table) {
             // Drop the existing foreign key constraint
             $table->dropForeign(['grind_id']);
@@ -28,6 +32,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('wallet_transactions') || !Schema::hasColumn('wallet_transactions', 'grind_id')) {
+            return;
+        }
+
         Schema::table('wallet_transactions', function (Blueprint $table) {
             // Drop the cascade delete constraint
             $table->dropForeign(['grind_id']);
